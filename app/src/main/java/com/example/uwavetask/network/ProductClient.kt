@@ -1,15 +1,10 @@
 package com.example.uwavetask.network
 
 import com.example.uwavetask.model.ProductModelItem
+import javax.inject.Inject
 
-class ProductClient private constructor():RemoteDataSource {
-    companion object{
-        private val remoteDataSource = ProductClient()
-        fun getInstance():ProductClient{
-            return remoteDataSource
-        }
-    }
+class ProductClient @Inject constructor(private val myApi:ProductApiService):RemoteDataSource {
     override suspend fun getDataFromApi(): List<ProductModelItem> {
-      return RetrofitClass.api_service.getDataFromApi()
+      return myApi.getDataFromApi()
     }
 }
