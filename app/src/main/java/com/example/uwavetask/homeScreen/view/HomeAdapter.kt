@@ -29,7 +29,10 @@ class HomeAdapter(private var products:List<ProductModelItem>):RecyclerView.Adap
     override fun getItemCount(): Int {
        return products.size
     }
-
+    fun updateList(updatedList:List<ProductModelItem>){
+        products = updatedList
+        notifyDataSetChanged()
+    }
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         holder.bind(products[position].Product)
         setAnimation(holder.itemView, position)

@@ -19,7 +19,5 @@ lateinit var binding:ActivityMainBinding
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.my_nav_host_fragment) as NavHostFragment
     }
 }
