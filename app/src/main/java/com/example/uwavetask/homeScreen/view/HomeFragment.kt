@@ -1,23 +1,23 @@
 package com.example.uwavetask.homeScreen.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.uwavetask.R
 import com.example.uwavetask.databinding.FragmentHomeBinding
 import com.example.uwavetask.homeScreen.viewModel.HomeViewModel
 import com.example.uwavetask.model.ProductModelItem
 import com.example.uwavetask.network.ApiState
 import com.example.uwavetask.network.RemoteDataSource
+import com.example.uwavetask.network.networkListner.NetworkListener
 import com.example.uwavetask.repository.Repository
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,13 +25,7 @@ import javax.inject.Inject
 class HomeFragment : Fragment() {
     private lateinit var binding:FragmentHomeBinding
     private lateinit var homeAdapter: HomeAdapter
-    @Inject lateinit var remote:RemoteDataSource
-    lateinit var repository:Repository
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        repository = Repository(remote)
-    }
-
+    private val homeViewModel: HomeViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,29 +36,50 @@ class HomeFragment : Fragment() {
             adapter = homeAdapter
             layoutManager =  GridLayoutManager(requireContext(), 2)
         }
-        val homeViewModel: HomeViewModel by viewModels()
-        homeViewModel.getDataFromApi()
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        getDataFromApiOrFromDatabase()
+    }
+    override fun onResume() {
+        super.onResume()
+        binding.homeSwipeLayout.setOnRefreshListener {
+            getDataFromApiOrFromDatabase()
+            binding.homeSwipeLayout.isRefreshing=false
+        }
+    }
+    private fun getDataFromApiOrFromDatabase(){
+        if(NetworkListener.getConnectivity(requireContext())){
+            homeViewModel.getDataFromApi()
+            apiObservation()
+        }else{
+            Snackbar.make(binding.homeRV,"no internet connection",Snackbar.LENGTH_SHORT).show()
+        }
+
+    }
+    private fun apiObservation(){
         lifecycleScope.launch {
-            homeViewModel.accessProductsData.collect(){res->
-                when (res){
-                    is ApiState.Loading->{}
+            homeViewModel.accessProductsData.collectLatest{result->
+                when (result){
+                    is ApiState.Loading->{
+                        binding.errorMsg.visibility = View.GONE
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
                     is ApiState.Success<*>->{
-                        var result =res.date as List<ProductModelItem>
-                        homeAdapter.updateList(result)
+                        binding.progressBar.visibility = View.GONE
+                        binding.errorMsg.visibility = View.GONE
+                        var productsList =result.date as List<ProductModelItem>
+                        homeAdapter.updateList(productsList)
                     }
                     is ApiState.Failure->{
+                        binding.progressBar.visibility = View.GONE
+                        binding.errorMsg.visibility = View.VISIBLE
 
                     }
                 }
-
             }
-
         }
-
-
-
-
-
-        return binding.root
     }
 }

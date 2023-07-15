@@ -1,10 +1,6 @@
 package com.example.uwavetask.di
 
-import android.app.Application
 import com.example.uwavetask.network.ProductApiService
-import com.example.uwavetask.network.ProductClient
-import com.example.uwavetask.network.RemoteDataSource
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
