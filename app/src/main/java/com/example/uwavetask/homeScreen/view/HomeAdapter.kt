@@ -19,7 +19,7 @@ import com.example.uwavetask.model.Product
 import com.example.uwavetask.model.ProductModelItem
 import java.util.*
 
-class HomeAdapter(private var products:List<ProductModelItem>):RecyclerView.Adapter<HomeAdapter.ProductViewHolder>()  {
+class HomeAdapter(private var products:List<ProductModelItem>,val delegate:Delegation):RecyclerView.Adapter<HomeAdapter.ProductViewHolder>()  {
     private var lastPosition = -1
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ProductCardBinding.inflate( LayoutInflater.from(parent.context),parent,false)
@@ -34,8 +34,12 @@ class HomeAdapter(private var products:List<ProductModelItem>):RecyclerView.Adap
         notifyDataSetChanged()
     }
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        holder.bind(products[position].Product)
+        val product = products[position].Product
+        holder.bind(product)
         setAnimation(holder.itemView, position)
+        holder.productBinding.root.setOnClickListener {
+            delegate.gotoDetailsScreen(product)
+        }
     }
 
 
@@ -55,7 +59,7 @@ class HomeAdapter(private var products:List<ProductModelItem>):RecyclerView.Adap
         return TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_RTL
     }
 
-    inner class ProductViewHolder(private val productBinding: ProductCardBinding) : RecyclerView.ViewHolder(productBinding.root) {
+    inner class ProductViewHolder( val productBinding: ProductCardBinding) : RecyclerView.ViewHolder(productBinding.root) {
         fun bind(product: Product) {
             productBinding.productItem = product
         }

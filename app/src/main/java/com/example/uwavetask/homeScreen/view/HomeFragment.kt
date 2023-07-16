@@ -7,22 +7,22 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.uwavetask.R
 import com.example.uwavetask.databinding.FragmentHomeBinding
 import com.example.uwavetask.homeScreen.viewModel.HomeViewModel
+import com.example.uwavetask.model.Product
 import com.example.uwavetask.model.ProductModelItem
 import com.example.uwavetask.network.ApiState
-import com.example.uwavetask.network.RemoteDataSource
 import com.example.uwavetask.network.networkListner.NetworkListener
-import com.example.uwavetask.repository.Repository
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(),Delegation {
     private lateinit var binding:FragmentHomeBinding
     private lateinit var homeAdapter: HomeAdapter
     private val homeViewModel: HomeViewModel by viewModels()
@@ -31,7 +31,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater)
-        homeAdapter=HomeAdapter(listOf())
+        homeAdapter=HomeAdapter(listOf(),this)
         binding.homeRV.apply {
             adapter = homeAdapter
             layoutManager =  GridLayoutManager(requireContext(), 2)
@@ -81,5 +81,13 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun gotoDetailsScreen(product: Product) {
+        val bundle = Bundle().apply {
+           putString("productName",product.name)
+           putString("productImage",product.image_url)
+        }
+       Navigation.findNavController(requireView()).navigate(R.id.fromHomeToDetails,bundle)
     }
 }
