@@ -1,5 +1,7 @@
 package com.example.uwavetask.di
 
+import com.example.uwavetask.database.ConcreteLocalData
+import com.example.uwavetask.database.LocalDataSource
 import com.example.uwavetask.network.ProductClient
 import com.example.uwavetask.network.RemoteDataSource
 import com.example.uwavetask.repository.Repository
@@ -18,6 +20,11 @@ abstract class InterfacesModule {
     abstract fun remoteDataSourceInjection(
         remoteSourceImpl: ProductClient
     ): RemoteDataSource
+    @Binds
+    @Singleton
+    abstract fun localDataSourceInjection(
+        localSourceImpl: ConcreteLocalData
+    ): LocalDataSource
     @Binds
     @Singleton
     abstract fun repoInjection(

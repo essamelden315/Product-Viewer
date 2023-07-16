@@ -19,7 +19,7 @@ import com.example.uwavetask.model.Product
 import com.example.uwavetask.model.ProductModelItem
 import java.util.*
 
-class HomeAdapter(private var products:List<ProductModelItem>,val delegate:Delegation):RecyclerView.Adapter<HomeAdapter.ProductViewHolder>()  {
+class HomeAdapter(private var products:List<Product>,val delegate:Delegation):RecyclerView.Adapter<HomeAdapter.ProductViewHolder>()  {
     private var lastPosition = -1
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ProductCardBinding.inflate( LayoutInflater.from(parent.context),parent,false)
@@ -29,12 +29,12 @@ class HomeAdapter(private var products:List<ProductModelItem>,val delegate:Deleg
     override fun getItemCount(): Int {
        return products.size
     }
-    fun updateList(updatedList:List<ProductModelItem>){
+    fun updateList(updatedList:List<Product>){
         products = updatedList
         notifyDataSetChanged()
     }
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        val product = products[position].Product
+        val product = products[position]
         holder.bind(product)
         setAnimation(holder.itemView, position)
         holder.productBinding.root.setOnClickListener {

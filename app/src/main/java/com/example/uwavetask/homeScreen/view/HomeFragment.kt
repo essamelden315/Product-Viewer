@@ -42,6 +42,8 @@ class HomeFragment : Fragment(),Delegation {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getDataFromApiOrFromDatabase()
+        apiObservation()
+        databaseObservation()
     }
     override fun onResume() {
         super.onResume()
@@ -53,15 +55,34 @@ class HomeFragment : Fragment(),Delegation {
     private fun getDataFromApiOrFromDatabase(){
         if(NetworkListener.getConnectivity(requireContext())){
             homeViewModel.getDataFromApi()
-            apiObservation()
         }else{
-            Snackbar.make(binding.homeRV,"no internet connection",Snackbar.LENGTH_SHORT).show()
+            homeViewModel.getDataFromDataBase()
+            Snackbar.make(requireView(),"no internet connection",Snackbar.LENGTH_SHORT).show()
         }
 
     }
+    private fun databaseObservation(){
+        lifecycleScope.launch {
+            homeViewModel.localData.collect{result->
+                when (result){
+                    is ApiState.Loading->{
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
+                    is ApiState.Success<*>->{
+                        binding.progressBar.visibility = View.GONE
+                        val productsList =result.date as List<Product>
+                        homeAdapter.updateList(productsList)
+                    }
+                    is ApiState.Failure->{
+                        binding.progressBar.visibility = View.GONE
+                    }
+                }
+            }
+        }
+    }
     private fun apiObservation(){
         lifecycleScope.launch {
-            homeViewModel.accessProductsData.collectLatest{result->
+            homeViewModel.accessProductsData.collect{result->
                 when (result){
                     is ApiState.Loading->{
                         binding.errorMsg.visibility = View.GONE
@@ -70,7 +91,7 @@ class HomeFragment : Fragment(),Delegation {
                     is ApiState.Success<*>->{
                         binding.progressBar.visibility = View.GONE
                         binding.errorMsg.visibility = View.GONE
-                        var productsList =result.date as List<ProductModelItem>
+                        val productsList =result.date as List<Product>
                         homeAdapter.updateList(productsList)
                     }
                     is ApiState.Failure->{
