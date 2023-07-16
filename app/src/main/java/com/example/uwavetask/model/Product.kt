@@ -14,4 +14,4 @@ data class Product(
     val shopping_cart_item_id: String?,
     val shopping_list_item_id: String?,
     val unit_price: String?
-)
+):java.io.Serializable

@@ -8,8 +8,7 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.uwavetask.homeScreen.view.HomeFragment"
-        android:label="fragment_home"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/fromHomeToDetails"
             app:destination="@id/detailsFragment" />
@@ -17,6 +16,5 @@
     <fragment
         android:id="@+id/detailsFragment"
         android:name="com.example.uwavetask.detailsScreen.view.DetailsFragment"
-        android:label="fragment_details"
         tools:layout="@layout/fragment_details" />
 </navigation>

@@ -57,6 +57,8 @@ class HomeFragment : Fragment(),Delegation {
             homeViewModel.getDataFromApi()
         }else{
             homeViewModel.getDataFromDataBase()
+            binding.errorMsg.text="No Internet Connection"
+            binding.errorMsg.visibility = View.VISIBLE
             Snackbar.make(requireView(),"no internet connection",Snackbar.LENGTH_SHORT).show()
         }
 
@@ -67,6 +69,7 @@ class HomeFragment : Fragment(),Delegation {
                 when (result){
                     is ApiState.Loading->{
                         binding.progressBar.visibility = View.VISIBLE
+                        binding.errorMsg.visibility = View.GONE
                     }
                     is ApiState.Success<*>->{
                         binding.progressBar.visibility = View.GONE
@@ -75,6 +78,7 @@ class HomeFragment : Fragment(),Delegation {
                     }
                     is ApiState.Failure->{
                         binding.progressBar.visibility = View.GONE
+                        binding.errorMsg.visibility = View.VISIBLE
                     }
                 }
             }
@@ -90,7 +94,6 @@ class HomeFragment : Fragment(),Delegation {
                     }
                     is ApiState.Success<*>->{
                         binding.progressBar.visibility = View.GONE
-                        binding.errorMsg.visibility = View.GONE
                         val productsList =result.date as List<Product>
                         homeAdapter.updateList(productsList)
                     }
