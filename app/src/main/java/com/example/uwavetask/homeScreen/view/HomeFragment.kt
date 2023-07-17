@@ -13,12 +13,10 @@ import com.example.uwavetask.R
 import com.example.uwavetask.databinding.FragmentHomeBinding
 import com.example.uwavetask.homeScreen.viewModel.HomeViewModel
 import com.example.uwavetask.model.Product
-import com.example.uwavetask.model.ProductModelItem
 import com.example.uwavetask.network.ApiState
 import com.example.uwavetask.network.networkListner.NetworkListener
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -42,8 +40,6 @@ class HomeFragment : Fragment(),Delegation {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getDataFromApiOrFromDatabase()
-        apiObservation()
-        databaseObservation()
     }
     override fun onResume() {
         super.onResume()
@@ -55,36 +51,40 @@ class HomeFragment : Fragment(),Delegation {
     private fun getDataFromApiOrFromDatabase(){
         if(NetworkListener.getConnectivity(requireContext())){
             homeViewModel.getDataFromApi()
+            apiObservation()
+            binding.lottieSplash.visibility = View.GONE
         }else{
             homeViewModel.getDataFromDataBase()
-            binding.errorMsg.text="No Internet Connection"
-            binding.errorMsg.visibility = View.VISIBLE
-            Snackbar.make(requireView(),"no internet connection",Snackbar.LENGTH_SHORT).show()
+            databaseObservation()
+            Snackbar.make(requireView(),"No Internet Connection",Snackbar.LENGTH_SHORT).show()
         }
 
     }
     private fun databaseObservation(){
+        binding.lottieSplash.visibility = View.VISIBLE
         lifecycleScope.launch {
             homeViewModel.localData.collect{result->
                 when (result){
                     is ApiState.Loading->{
                         binding.progressBar.visibility = View.VISIBLE
-                        binding.errorMsg.visibility = View.GONE
                     }
                     is ApiState.Success<*>->{
                         binding.progressBar.visibility = View.GONE
+                        binding.errorMsg.visibility = View.GONE
                         val productsList =result.date as List<Product>
+                        if (productsList.isNotEmpty()){ binding.lottieSplash.visibility = View.GONE}
                         homeAdapter.updateList(productsList)
                     }
                     is ApiState.Failure->{
                         binding.progressBar.visibility = View.GONE
-                        binding.errorMsg.visibility = View.VISIBLE
+
                     }
                 }
             }
         }
     }
     private fun apiObservation(){
+        binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             homeViewModel.accessProductsData.collect{result->
                 when (result){
@@ -100,7 +100,6 @@ class HomeFragment : Fragment(),Delegation {
                     is ApiState.Failure->{
                         binding.progressBar.visibility = View.GONE
                         binding.errorMsg.visibility = View.VISIBLE
-
                     }
                 }
             }
@@ -109,9 +108,8 @@ class HomeFragment : Fragment(),Delegation {
 
     override fun gotoDetailsScreen(product: Product) {
         val bundle = Bundle().apply {
-           putString("productName",product.name)
-           putString("productImage",product.image_url)
+            putSerializable("Product",product)
         }
-       Navigation.findNavController(requireView()).navigate(R.id.fromHomeToDetails,bundle)
+        Navigation.findNavController(requireView()).navigate(R.id.fromHomeToDetails,bundle)
     }
 }

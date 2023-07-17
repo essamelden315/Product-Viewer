@@ -1,11 +1,10 @@
 package com.example.uwavetask.detailsScreen.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.uwavetask.R
+import androidx.fragment.app.Fragment
 import com.example.uwavetask.databinding.FragmentDetailsBinding
 import com.example.uwavetask.model.Product
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,10 +17,8 @@ class DetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         detailsBinding = FragmentDetailsBinding.inflate(inflater)
-        val productName = (arguments?.getString("productName"))
-        val productImage = (arguments?.getString("productImage"))
-        detailsBinding.productName = productName
-        detailsBinding.productImage = productImage
+        val product = arguments?.getSerializable("Product") as Product
+        detailsBinding.product = product
         return detailsBinding.root
     }
 }
